@@ -141,6 +141,14 @@ if archivo_subido:
         st.sidebar.write(f"📉 Ahorro estimado: {ahorro:.2f}%")
         st.sidebar.write(f"📐 MSE: {mse:.2f}")
 
+        st.sidebar.write(
+            f"🧮 Datos originales: {datos_originales:,}"
+        )
+
+        st.sidebar.write(
+            f"🧮 Datos SVD: {datos_comprimidos:,}"
+        )
+
         col1, col2 = st.columns(2)
 
         with col1:
@@ -230,6 +238,13 @@ if archivo_subido:
         st.sidebar.write(f"📏 Dimensión: {alto} x {ancho}")
         st.sidebar.write(f"📉 Ahorro estimado: {ahorro:.2f}%")
         st.sidebar.write(f"📐 MSE: {mse:.2f}")
+        st.sidebar.write(
+            f"🧮 Datos originales: {datos_originales:,}"
+        )
+        
+        st.sidebar.write(
+            f"🧮 Datos SVD: {datos_comprimidos:,}"
+        )
 
         col1, col2 = st.columns(2)
 
@@ -254,60 +269,99 @@ if archivo_subido:
         )
 
     # --------------------------------
-    # DESCARGA!!!
     # --------------------------------
-
+    # DESCARGA Y COMPARACIÓN DE PESO
+    # --------------------------------
+    
     st.markdown("---")
-
+    
     buffer = BytesIO()
-
+    
+    # Guardar como JPEG para reducir tamaño real
     imagen_descarga.save(
         buffer,
-        format="PNG"
+        format="JPEG",
+        quality=60
     )
-
+    
+    # Tamaño original del archivo subido
+    peso_original = len(
+        archivo_subido.getvalue()
+    )
+    
+    # Tamaño de la imagen comprimida
+    peso_comprimido = len(
+        buffer.getvalue()
+    )
+    
+    # Porcentaje de reducción real
+    reduccion_real = (
+        (peso_original - peso_comprimido)
+        / peso_original
+    ) * 100
+    
+    st.subheader("📦 Comparación de Tamaño de Archivo")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Original",
+            f"{peso_original/1024:.2f} KB"
+        )
+    
+    with col2:
+        st.metric(
+            "Comprimida",
+            f"{peso_comprimido/1024:.2f} KB"
+        )
+    
+    with col3:
+        st.metric(
+            "Reducción",
+            f"{reduccion_real:.2f}%"
+        )
+    
     st.download_button(
         label="⬇️ Descargar imagen comprimida",
         data=buffer.getvalue(),
-        file_name="imagen_comprimida.png",
-        mime="image/png"
+        file_name="imagen_comprimida.jpg",
+        mime="image/jpeg"
     )
-
     # --------------------------------
-    # GRÁFICO!!!
     # --------------------------------
-
+    # GRÁFICO
+    # --------------------------------
+    
     st.markdown("---")
-
+    
     st.subheader(
         "📈 Comportamiento de los Valores Singulares"
     )
-
+    
     fig, ax = plt.subplots(
         figsize=(10, 4)
     )
-
+    
     ax.plot(
         S,
         linewidth=2
     )
-
+    
     ax.axvline(
         x=k,
         linestyle="--",
         linewidth=2,
         label=f"k = {k}"
     )
-
+    
     ax.set_yscale("log")
     ax.set_xlabel("Índice")
     ax.set_ylabel("Magnitud")
     ax.legend()
     ax.grid(True)
-
+    
     st.pyplot(fig)
-
-    # --------------------------------
     # MATRICES SVD
     # --------------------------------
 
